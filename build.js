@@ -23,6 +23,9 @@ FileSystem.readdir(story).then(async dirs => {
             .then(file => YAML.parse(file))
         );
 
+        const episode = Path.join(dist, meta.path)
+        FileSystem.mkdir(Path.join(episode));
+
         replace.meta = {
             series: "Pair Purgatory",
             title: meta.title,
@@ -34,14 +37,21 @@ FileSystem.readdir(story).then(async dirs => {
             scripts: "<!-- scripts go here -->"
         };
 
-        Promise.all(meta.content.map(item => FileSystem.readFile(
-            Path.join(story, dir, "content", item)
-        ))).then(
+        Promise.all(
+            meta.content.map(item => FileSystem.readFile(
+                Path.join(story, dir, "content", item)
+            )
+        )).then(
             content => replace.content = content.join("\n")
         );
 
-        const page = template.replace(regex, (match, path) => {
-            // https://github.com/chiptumor/chiptumor.github.io/blob/main/build/plugin/replace-templates.js
-        });
+        const page = template.replace(regex, (match, path) => 
+            path.split(".").reduce(
+                (obj, key) => obj?.[key] ?? match,
+                replace
+            )
+        );
+
+        FileSystem.writeFile(Path.join(episode, "index.html"), page);
     }
 });
