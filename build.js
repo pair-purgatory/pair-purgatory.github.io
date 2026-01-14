@@ -5,6 +5,10 @@ import * as FileSystem from "node:fs/promises";
 import YAML from "yaml";
 
 const dist = Path.resolve("./dist/");
+await FileSystem.rm(dist, {
+    recursive: true,
+    force: true
+});
 await FileSystem.mkdir(dist);
 
 const story = Path.resolve("./src/story/");
@@ -19,12 +23,9 @@ FileSystem.readdir(story).then(async dirs => {
 
         const meta = await (
             Glob(Path.join(story, dir, "metadata.yaml"))
-            .then(path => FileSystem.readFile(path, "utf8"))
+            .then(path => FileSystem.readFile(path[0], "utf8"))
             .then(file => YAML.parse(file))
         );
-
-        const episode = Path.join(dist, meta.path)
-        FileSystem.mkdir(Path.join(episode));
 
         replace.meta = {
             series: "Pair Purgatory",
@@ -37,12 +38,17 @@ FileSystem.readdir(story).then(async dirs => {
             scripts: "<!-- scripts go here -->"
         };
 
-        Promise.all(
+        await Promise.all(
             meta.content.map(item => FileSystem.readFile(
-                Path.join(story, dir, "content", item)
-            )
-        )).then(
-            content => replace.content = content.join("\n")
+                Path.join(story, dir, "content", item), "utf8"
+            ))
+        ).then(content => replace.content = 
+            "<article>\n" +
+            content.join(
+                " ".repeat(8) + "</article>" + "\n" +
+                " ".repeat(8) + "<article>" + "\n"
+            ) +
+            " ".repeat(8) + "</article>"
         );
 
         const page = template.replace(regex, (match, path) => 
@@ -51,6 +57,9 @@ FileSystem.readdir(story).then(async dirs => {
                 replace
             )
         );
+
+        const episode = Path.join(dist, meta.path)
+        await FileSystem.mkdir(episode, { recursive: true });
 
         FileSystem.writeFile(Path.join(episode, "index.html"), page);
     }
