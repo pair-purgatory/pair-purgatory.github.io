@@ -11,6 +11,11 @@ await FileSystem.rm(dist, {
 });
 await FileSystem.mkdir(dist);
 
+await FileSystem.cp(Path.resolve("./public/"), dist, {
+    recursive: true,
+    force: true
+});
+
 const story = Path.resolve("./src/story/");
 FileSystem.readdir(story).then(async dirs => {
     const template = await FileSystem.readFile(
