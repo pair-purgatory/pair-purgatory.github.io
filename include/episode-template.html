@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ series }}: {{ title }}</title>
+    <title>{{ meta.series }}: {{ meta.title }}</title>
 
-    {{ style }}
-    {{ scripts }}
+    {{ page.styles }}
+    {{ page.scripts }}
 </head>
 <body>
     <article>
         <header>
-            <h1>{{ series }}: {{ title }}</h1>
-            <p>Written by {{ author }}</p>
+            <h1>{{ meta.series }}: {{ meta.title }}</h1>
+            <p>Written by {{ meta.author }}</p>
         </header>
         {{ content }}
     </article>
